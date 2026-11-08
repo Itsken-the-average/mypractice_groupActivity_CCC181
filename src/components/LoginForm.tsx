@@ -1,8 +1,8 @@
-// GIVEN FILE (styled in form.css by Member 3). Do not edit.
-// The sign-in is a DEMO: nothing is sent to a server and nothing is saved.
 import { useState } from 'react';
 import type { ChangeEvent, FormEvent } from 'react';
 import type { LoginErrors, LoginFormValues } from '../types';
+import { ApiError, login, saveToken } from '../api/auth';
+import type { User } from '../api/auth';
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -23,11 +23,16 @@ function validate(values: LoginFormValues): LoginErrors {
   return errors;
 }
 
-export default function LoginForm() {
+type LoginFormProps = {
+  onLoggedIn: (user: User) => void;
+};
+
+export default function LoginForm({ onLoggedIn }: LoginFormProps) {
   const [values, setValues] = useState<LoginFormValues>(INITIAL_VALUES);
   const [errors, setErrors] = useState<LoginErrors>({});
   const [showPassword, setShowPassword] = useState<boolean>(false);
-  const [signedInAs, setSignedInAs] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [formError, setFormError] = useState<string>('');
 
   function handleChange(event: ChangeEvent<HTMLInputElement>) {
     const { name, type, value, checked } = event.target;
@@ -37,11 +42,29 @@ export default function LoginForm() {
     }));
   }
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    setFormError('');
+
     const nextErrors = validate(values);
     setErrors(nextErrors);
-    setSignedInAs(Object.keys(nextErrors).length === 0 ? values.email : null);
+    if (Object.keys(nextErrors).length > 0) {
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const result = await login(values.email, values.password);
+      saveToken(result.token);
+      onLoggedIn(result.user);
+    } catch (err) {
+      setFormError(
+        err instanceof ApiError
+          ? err.message
+          : 'Something went wrong on our side. Please try again later.'
+      );
+      setLoading(false);
+    }
   }
 
   return (
@@ -50,6 +73,12 @@ export default function LoginForm() {
         Sign in
       </h2>
       <p className="login-card__subtitle">Use your school email to continue.</p>
+
+      {formError && (
+        <p className="form-error form-alert" role="alert">
+          {formError}
+        </p>
+      )}
 
       <form className="login-form" onSubmit={handleSubmit} noValidate>
         <div className="form-field">
@@ -118,16 +147,9 @@ export default function LoginForm() {
           </a>
         </div>
 
-        <button type="submit" className="btn btn--primary">
-          Sign in
+        <button type="submit" className="btn btn--primary" disabled={loading}>
+          {loading ? 'Signing in...' : 'Sign in'}
         </button>
-
-        {signedInAs && (
-          <p className="form-success" role="status">
-            Demo only: {signedInAs} would be signed in here. Nothing was sent
-            or saved.
-          </p>
-        )}
       </form>
 
       <div className="login-card__divider">
