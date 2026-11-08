@@ -3,7 +3,9 @@ const express = require("express");
 const cors = require("cors");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const { findByEmail } = require("./users");
+const { findByEmail, findById } = require("./users");
+const requireAuth = require("./middleware/requireAuth");
+const { notFound, errorHandler } = require("./middleware/errorHandlers");
 
 const PORT = process.env.PORT || 3000;
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -52,6 +54,23 @@ app.post("/api/v1/sessions", (req, res) => {
 });
 
 // ===== Member 2 routes and handlers go here (next branch) =====
+
+// Who am I? (protected by the guard)
+app.get("/api/v1/users/me", requireAuth, (req, res) => {
+  const user = findById(req.userId);
+
+  if (!user) {
+    return res.status(401).json({ error: "Not logged in." });
+  }
+
+  res.status(200).json({ id: user.id, name: user.name, email: user.email });
+});
+
+// Unknown route: must come AFTER all routes
+app.use(notFound);
+
+// Crash catcher: must be the very LAST one
+app.use(errorHandler);
 
 app.listen(PORT, () => {
   console.log(`API running on http://localhost:${PORT}`);
