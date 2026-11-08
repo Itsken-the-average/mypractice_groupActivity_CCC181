@@ -1,0 +1,75 @@
+/* Part 2: styles for the API messages, session check and Welcome screen.
+   Mobile-first: base rules are for 360px, min-width queries add more. */
+
+   .form-alert {
+    margin: 0 0 16px;
+    padding: 12px 14px;
+    border: 1px solid #c62828;
+    border-radius: 8px;
+    background: #fdecea;
+    color: #b71c1c;
+    font-size: 0.95rem;
+    overflow-wrap: anywhere;
+  }
+  
+  .btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+  
+  .session-check {
+    margin: 0;
+    padding: 24px 16px;
+    text-align: center;
+    color: #555;
+  }
+  
+  .welcome {
+    padding: 24px 16px;
+    border-radius: 12px;
+    background: #ffffff;
+    text-align: center;
+    overflow-wrap: anywhere;
+  }
+  
+  .welcome__title {
+    margin: 0 0 8px;
+    font-size: 1.5rem;
+  }
+  
+  .welcome__email {
+    margin: 0 0 24px;
+    color: #555;
+  }
+  
+  .welcome__logout {
+    width: 100%;
+    min-height: 48px;
+    padding: 0 24px;
+    border: 0;
+    border-radius: 8px;
+    background: #1a73e8;
+    color: #ffffff;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  
+  .welcome__logout:hover {
+    background: #1557b0;
+  }
+  
+  @media (min-width: 768px) {
+    .welcome {
+      padding: 32px 24px;
+    }
+  
+    .welcome__title {
+      font-size: 1.75rem;
+    }
+  
+    .welcome__logout {
+      width: auto;
+      min-width: 200px;
+    }
+  }
